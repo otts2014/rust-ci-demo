@@ -74,7 +74,7 @@ jobs:
         uses: MatteoCampinoti94/changelog-to-release@v1.0.0
         with:
           version-name: ${{ steps.tagName.outputs.tag }}
- 
+
       - name: Build Release
         shell: bash
         run: |
