@@ -1,23 +1,21 @@
- 
 name: Build Release
- 
+
 on:
   push:
     tags:
       - "v*"
- 
+  workflow_dispatch:
+
 env:
   CARGO_TERM_COLOR: always
-  # 可更换成自己项目编译后的名称
   BIN_NAME: "codegen"
- 
+
 jobs:
   build:
     name: build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-      # 不需要构建 macOS ARM 发行版可删除 macos-arm 构建项
         build: [linux, macos, windows]
         include:
           - build: linux
@@ -37,17 +35,17 @@ jobs:
             target: x86_64-pc-windows-msvc
             release-file-suffix: x86_64-windows.7z
       fail-fast: false
- 
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
- 
+
       - name: Get Tag Name
         id: tagName
         uses: olegtarasov/get-tag@v2.1.1
- 
+
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -55,20 +53,20 @@ jobs:
           profile: minimal
           override: true
           target: ${{ matrix.target }}
- 
+
       - name: Install prerequisites
         if: matrix.run != ''
         run: ${{ matrix.run }}
- 
+
       - name: Build binary
         run: cargo build --verbose --release --target ${{ matrix.target }}
         env:
           RUST_BACKTRACE: 1
- 
+
       - name: Strip binary (linux and macos)
         if: matrix.build == 'linux' || matrix.build == 'macos' || matrix.build == 'macos-arm'
         run: strip "target/${{ matrix.target }}/release/${{ env.BIN_NAME }}"
- 
+
       - name: Generate Changelog
         id: changelog
         uses: MatteoCampinoti94/changelog-to-release@v1.0.0
@@ -79,7 +77,6 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist temp
-      # 自定义拷贝要打包到压缩包里的文件
           cp -r LICENSE README.md CHANGELOG.md config.yaml ./templates temp/
           cd temp
           version="${{ steps.tagName.outputs.tag }}"
@@ -90,7 +87,7 @@ jobs:
             cp "../target/${{ matrix.target }}/release/${{ env.BIN_NAME }}" ./
             tar czf "../dist/${{ env.BIN_NAME }}-$version-${{ matrix.release-file-suffix }}" *
           fi
- 
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
