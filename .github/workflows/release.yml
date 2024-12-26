@@ -77,7 +77,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist temp
-          cp -r LICENSE README.md CHANGELOG.md config.yaml ./templates temp/
+          cp -r CHANGELOG.md temp/
           cd temp
           version="${{ steps.tagName.outputs.tag }}"
           if [ "${{ matrix.build }}" = "windows" ]; then
