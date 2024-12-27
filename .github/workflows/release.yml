@@ -9,6 +9,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   BIN_NAME: "rust-ci-demo"
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:
